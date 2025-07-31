@@ -148,11 +148,15 @@ MISSÃO CRÍTICA: Gerar a ANÁLISE MAIS COMPLETA, PROFUNDA E REAL possível, bas
 
 CRÍTICO: Esta análise será usada para decisões de investimento REAIS de milhões de reais. A qualidade deve ser IMPECÁVEL, ULTRA-DETALHADA e 100% REAL.
 
-Gere uma análise ULTRA-COMPLETA em formato JSON estruturado. NUNCA use dados simulados ou genéricos. Baseie-se APENAS em dados REAIS do mercado brasileiro.
+IMPORTANTE: 
+- Retorne APENAS um objeto JSON válido
+- NÃO inclua explicações, textos introdutórios, nem markdown
+- O JSON deve começar com { e terminar com }
+- Use APENAS dados REAIS do contexto fornecido
+- NUNCA use dados simulados ou genéricos
 
 Estrutura OBRIGATÓRIA:
 
-```json
 {
   "avatar_ultra_detalhado": {
     "nome_ficticio": "Nome representativo baseado em dados reais do segmento",
@@ -267,7 +271,6 @@ Estrutura OBRIGATÓRIA:
     "Lista de 20-25 insights únicos, específicos e ULTRA-VALIOSOS baseados na análise REAL profunda do nicho, avatar e mercado"
   ]
 }
-```
 
 ## DIRETRIZES ULTRA-CRÍTICAS REAIS:
 
@@ -283,8 +286,6 @@ Estrutura OBRIGATÓRIA:
 10. **RESULTADOS GARANTIDOS REAIS**: Cada recomendação deve ter alta probabilidade de sucesso REAL
 
 **CRÍTICO**: NUNCA use dados simulados, genéricos ou de exemplo. TUDO deve ser baseado em dados REAIS do mercado brasileiro e do segmento específico.
-
-**IMPORTANTE**: Gere APENAS o JSON válido e ultra-completo REAL, sem texto adicional antes ou depois. Cada campo deve estar preenchido com informações específicas, detalhadas e REAIS.
 """
         
         return prompt

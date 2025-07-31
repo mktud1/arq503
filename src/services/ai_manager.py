@@ -125,8 +125,7 @@ class AIManager:
         
         provider_name = self.get_best_provider()
         if not provider_name:
-            logger.error("❌ Nenhum provedor de IA disponível")
-            return None
+            raise RuntimeError("FALHA CRÍTICA: Nenhum provedor de IA disponível. Configure pelo menos uma API de IA.")
         
         logger.info(f"🤖 Usando provedor: {provider_name}")
         
@@ -142,9 +141,12 @@ class AIManager:
             self.providers[provider_name]['error_count'] += 1
             
             # Tenta próximo provedor
-            return self._try_fallback(prompt, max_tokens, exclude=[provider_name])
+            fallback_result = self._try_fallback(prompt, max_tokens, exclude=[provider_name])
+            if not fallback_result:
+                raise RuntimeError(f"FALHA CRÍTICA: Todos os provedores de IA falharam. Último erro: {str(e)}")
+            return fallback_result
         
-        return None
+        raise RuntimeError("FALHA CRÍTICA: Nenhum provedor de IA conseguiu processar a requisição.")
     
     def _generate_with_gemini(self, prompt: str, max_tokens: int) -> Optional[str]:
         """Gera conteúdo usando Gemini"""
@@ -312,7 +314,7 @@ class AIManager:
                 self.providers[provider_name]['error_count'] += 1
                 continue
         
-        logger.error("❌ Todos os provedores de fallback falharam")
+        logger.error("❌ FALHA CRÍTICA: Todos os provedores de IA falharam")
         return None
     
     def get_provider_status(self) -> Dict[str, Any]:

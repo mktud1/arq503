@@ -160,6 +160,7 @@ class ProductionContentExtractor:
         """Extrai conteúdo usando múltiplas estratégias robustas"""
         
         if not url or not url.startswith('http'):
+            logger.warning(f"⚠️ URL inválida para extração: {url}")
             return None
         
         logger.info(f"🔍 Extraindo conteúdo de: {url[:80]}...")
@@ -197,7 +198,7 @@ class ProductionContentExtractor:
                 logger.warning(f"⚠️ Estratégia {strategy} falhou para {url}: {str(e)}")
                 continue
         
-        logger.error(f"❌ Todas as estratégias falharam para {url}")
+        logger.error(f"❌ FALHA CRÍTICA: Todas as estratégias de extração falharam para {url}")
         return None
     
     def _extract_with_jina_api(self, url: str) -> Optional[str]:

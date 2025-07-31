@@ -53,11 +53,27 @@ class AnalysisManager {
                 body: JSON.stringify(formData)
             });
 
-            if (!response.ok) {
-                throw new Error(`Erro na análise: ${response.status}`);
-            }
-
             const result = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(result.message || `Erro HTTP ${response.status}: ${result.error || 'Erro desconhecido'}`);
+            }
+            
+            // VALIDAÇÃO CRÍTICA DO RESULTADO
+            if (!result || typeof result !== 'object') {
+                throw new Error('FALHA CRÍTICA: Resposta inválida do servidor');
+            }
+            
+            if (result.error) {
+                throw new Error(result.message || result.error);
+            }
+            
+            // Verifica se tem seções obrigatórias
+            const requiredSections = ['avatar_ultra_detalhado', 'insights_exclusivos'];
+            const missingSections = requiredSections.filter(section => !result[section]);
+            if (missingSections.length > 0) {
+                throw new Error(`FALHA CRÍTICA: Seções obrigatórias ausentes: ${missingSections.join(', ')}`);
+            }
             
             // Para polling de progresso
             this.stopProgressPolling();

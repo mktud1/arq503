@@ -13,8 +13,8 @@ from datetime import datetime
 from flask import Blueprint, request, jsonify, session
 from services.enhanced_analysis_engine import enhanced_analysis_engine
 from services.ultra_detailed_analysis_engine import ultra_detailed_analysis_engine
-from services.ai_manager import ai_manager
 from services.production_search_manager import production_search_manager
+from services.ai_manager import ai_manager
 from services.attachment_service import attachment_service
 from database import db_manager
 from routes.progress import get_progress_tracker, update_analysis_progress

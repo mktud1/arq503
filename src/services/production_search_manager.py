@@ -737,7 +737,21 @@ class ProductionSearchManager:
         cached_results = self.cache.get(query, "combined")
         if cached_results:
             logger.info(f"📦 Usando resultados do cache para: {query[:50]}...")
-            return cached_results
+            # Converte para formato dict se necessário
+            dict_results = []
+            for result in cached_results:
+                if hasattr(result, '__dict__'):
+                    dict_results.append({
+                        'title': result.title,
+                        'url': result.url,
+                        'snippet': result.snippet,
+                        'source': result.source,
+                        'relevance_score': getattr(result, 'relevance_score', 0.0),
+                        'timestamp': result.timestamp.isoformat() if hasattr(result, 'timestamp') and result.timestamp else datetime.now().isoformat()
+                    })
+                else:
+                    dict_results.append(result)
+            return dict_results
         
         all_results = []
         successful_providers = []
@@ -748,6 +762,9 @@ class ProductionSearchManager:
             if config['enabled'] and config['error_count'] < 5
         ]
         available_providers.sort(key=lambda x: x[1]['priority'])
+        
+        if not available_providers:
+            raise RuntimeError("FALHA CRÍTICA: Nenhum provedor de busca disponível. Configure pelo menos uma API de busca.")
         
         # Executa busca em paralelo para otimização
         with ThreadPoolExecutor(max_workers=4) as executor:
@@ -760,8 +777,7 @@ class ProductionSearchManager:
                     future = executor.submit(self.search_serper, query, max_results // 2)
                 elif provider_name == 'bing':
                     future = executor.submit(self.search_bing_scraping, query, max_results // 2)
-                elif provider_name == 'duckduckgo':
-                    future = executor.submit(self.search_duckduckgo_scraping, query, max_results // 3)
+                # REMOVIDO: DuckDuckGo temporariamente devido a problemas de 202
                 else:
                     continue
                 
@@ -783,6 +799,10 @@ class ProductionSearchManager:
                     logger.error(f"❌ Erro em {provider_name}: {e}")
                     self._handle_provider_error(provider_name, e)
         
+        # VALIDAÇÃO CRÍTICA: Deve ter resultados
+        if not all_results:
+            raise RuntimeError(f"FALHA CRÍTICA: Nenhum resultado encontrado para query '{query}'. Todos os provedores falharam.")
+        
         # Remove duplicatas baseado na URL
         unique_results = []
         seen_urls = set()
@@ -797,6 +817,10 @@ class ProductionSearchManager:
         
         # Limita resultados
         final_results = unique_results[:max_results]
+        
+        # VALIDAÇÃO FINAL
+        if len(final_results) < 3:
+            raise RuntimeError(f"FALHA CRÍTICA: Apenas {len(final_results)} resultados únicos encontrados. Mínimo necessário: 3.")
         
         # Converte SearchResult para dict se necessário
         dict_results = []
